@@ -78,15 +78,19 @@ export const useAuthStore = defineStore('auth', {
         phone: foundUser.phone || null,
         address: foundUser.address || null,
         id: foundUser.id,
+        mustChangePassword: foundUser.mustChangePassword,
       };
 
       const storageKey = type === 'admin' ? 'adminProfile' : 'clientProfile';
 
-      sessionStorage.removeItem(
-        type === 'admin' ? 'clientProfile' : 'adminProfile'
-      );
-      this.clientProfile = type === 'user' ? profileData : null;
-      this.adminProfile = type === 'admin' ? profileData : null;
+      this.clientProfile = null;
+      this.adminProfile = null;
+
+      if (type === 'user') {
+        this.clientProfile = profileData;
+      } else if (type === 'admin') {
+        this.adminProfile = profileData;
+      }
 
       sessionStorage.setItem(storageKey, JSON.stringify(profileData));
     },
@@ -211,8 +215,21 @@ export const useAuthStore = defineStore('auth', {
           throw new Error('Incorrect Old Password');
         }
 
-        const newPasswordPayload = { password: newPassword };
-        await axios.patch(endpoint, newPasswordPayload);
+        const newPasswordPayload = {
+          password: newPassword,
+          mustChangePassword: false,
+        };
+
+        const patchResponse = await axios.patch(endpoint, newPasswordPayload);
+
+        if (patchResponse.data) {
+          this._handleSuccessfulLogin(patchResponse.data, this.userType);
+        }
+
+        console.log(
+          `Password and 'mustChangePassword' flag updated successfully.`
+        );
+        return true;
       } catch (err) {
         this.error = err.message || 'Failed to update password.';
         throw err;

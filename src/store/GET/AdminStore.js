@@ -4,6 +4,27 @@ import { useAuthStore } from '../AuthStore';
 
 const URL = import.meta.env.VITE_LOCAL_API_URL;
 
+const generateAdminUsername = (name) => {
+  const parts = name
+    .toLowerCase()
+    .split(' ')
+    .filter((p) => p.length > 0);
+  const usernameBase = parts.slice(0, 2).join('');
+  return usernameBase.length > 0 ? `${usernameBase}88` : 'newadmin88';
+};
+
+const createNewAdminPayload = (credentials, tempPassword) => ({
+  name: credentials.name,
+  email: credentials.email,
+
+  username: generateAdminUsername(credentials.name),
+  createdOn: new Date().toISOString(),
+  phone: credentials.phone || 'yet to be set',
+
+  password: tempPassword,
+  mustChangePassword: true,
+});
+
 export const useAdminStore = defineStore('admin', {
   state: () => ({
     admins: [],
@@ -56,12 +77,31 @@ export const useAdminStore = defineStore('admin', {
     },
 
     async addNewAdmin(credentials) {
-      const password = 'temp12345';
+      this.loading = true;
+      this.error = null;
+
+      const tempPassword = 'temp12345';
+
+      const payload = createNewAdminPayload(credentials, tempPassword);
+
       try {
-        const response = axios.post(
-          `${URL}/admin?name=${credentials.name}&email=${credentials.email}&password=${password}`
-        );
-      } catch (error) {}
+        const response = await axios.post(`${URL}/admin`, payload);
+        if (response.status === 201) {
+          this.fetchAllAdmins();
+          return {
+            success: true,
+            tempPassword: tempPassword,
+          };
+        } else {
+          throw new Error(`Server returned status: ${response.status}.`);
+        }
+      } catch (err) {
+        this.error =
+          err.response?.data?.message || 'Failed to create new administrator.';
+        throw err;
+      } finally {
+        this.loading = false;
+      }
     },
   },
 });

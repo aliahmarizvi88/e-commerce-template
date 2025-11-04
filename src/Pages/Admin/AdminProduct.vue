@@ -122,6 +122,7 @@ onMounted(() => {
       v-model="showDailogue"
       :title="isEditing ? 'Update Product' : 'Add Product'"
       width="420px"
+      type="form"
       @confirm="handleConfirm"
       @cancel="showDailogue = false"
     >

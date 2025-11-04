@@ -1,6 +1,7 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useAuthStore } from '../../store/AuthStore';
+import { useAdminStore } from '../../store/GET/AdminStore';
 import { useRouter } from 'vue-router';
 
 import UniDailogue from '../../components/UniDailogue.vue';
@@ -8,15 +9,12 @@ import { showToast } from '../../utils/Toast';
 import Uni_table from '../../components/Admin/Uni_table.vue';
 
 const authStore = useAuthStore();
+const adminStore = useAdminStore();
+
 const adminProfile = computed(() => authStore.userProfile);
 const router = useRouter();
 
-const columns = [
-  { key: '', label: '' },
-  { key: '', label: '' },
-  { key: '', label: '' },
-  { key: '', label: '' },
-];
+//Tabs & functions
 const activeTab = ref('Admin Profile');
 const tabs = ['Admin Profile', 'Manage Admins'];
 
@@ -42,6 +40,56 @@ const formattedCreationDate = computed(() => {
   }
 });
 
+//UniTable Codes
+const currentAdminId = computed(() => authStore.userProfile?.id);
+
+const adminFilteredList = computed(() => {
+  const allAdmin = adminStore.admins;
+
+  if (!currentAdminId.value || !allAdmin.length) {
+    return allAdmin;
+  }
+
+  return allAdmin.filter((admin) => admin.id !== currentAdminId.value);
+});
+
+const columns = [
+  { key: 'id', label: 'ID' },
+  { key: 'name', label: 'Name' },
+  { key: 'email', label: 'Email' },
+  { key: 'createdOn', label: 'Created On' },
+  { key: 'phone', label: 'Phone' },
+];
+
+onMounted(() => {
+  if (authStore.isAdmin) {
+    adminStore.fetchAllAdmins();
+  }
+});
+const AddDailog = ref(false);
+
+const form = ref({
+  name: '',
+  email: '',
+});
+
+function handleAdd() {
+  form.value = {
+    name: '',
+    email: '',
+  };
+  AddDailog.value = true;
+}
+
+const handleConfrim = () => {
+  if (!form.value.name || !form.value.email) {
+    showToast('Something is missing.');
+    return;
+  }
+  adminStore.addNewAdmin(form.value);
+  AddDailog.value = false;
+};
+
 //Change Admin Details:
 const updateDailog = ref(false);
 
@@ -52,7 +100,7 @@ const detailForm = ref({
 });
 
 const handleUpdateClick = () => {
-  if (!adminProfile.value) {
+  if (adminProfile.value) {
     detailForm.value = {
       name: adminProfile.value.name || '',
       username: adminProfile.value.username || '',
@@ -207,68 +255,109 @@ const handleLogout = () => {
           </div>
         </section>
       </div>
+      <div
+        v-if="adminProfile?.mustChangePassword === true"
+        class="max-w-4xl mx-auto p-4 bg-red-200 shadow-xl rounded-lg mt-5 border border-red-500"
+      >
+        <p class="text-sm text-red-600">
+          Please Change your Password as soon as possible.
+        </p>
+      </div>
+
+      <!-- Update Dailogue -->
+      <UniDailogue
+        v-model="updateDailog"
+        title="Update Admin"
+        type="form"
+        width="420px"
+        @confirm="updateDailog.value = false"
+      >
+        <div class="flex flex-col gap-5">
+          <input
+            type="text"
+            class="border border-gray-300 py-2 px-3 rounded-lg"
+            v-model="detailForm.name"
+            placeholder="Enter name"
+          />
+          <input
+            type="text"
+            class="border border-gray-300 py-2 px-3 rounded-lg"
+            v-model="detailForm.username"
+            placeholder="Enter Username"
+          />
+          <input
+            type="text"
+            class="border border-gray-300 py-2 px-3 rounded-lg"
+            v-model="detailForm.phone"
+            placeholder="Enter Phone"
+          />
+        </div>
+      </UniDailogue>
+
+      <!-- Password Dailogue -->
+      <UniDailogue
+        v-model="passwordDailog"
+        title="Change Password"
+        type="form"
+        width="420px"
+        @confirm="handleConfirmPassword"
+      >
+        <div class="flex flex-col gap-5">
+          <input
+            type="password"
+            class="border border-gray-300 py-2 px-3 rounded-lg"
+            v-model="passwordForm.oldPassword"
+            placeholder="Old Password"
+          />
+          <input
+            type="password"
+            class="border border-gray-300 py-2 px-3 rounded-lg"
+            v-model="passwordForm.newPassword"
+            placeholder="New Password"
+          />
+          <input
+            type="password"
+            class="border border-gray-300 py-2 px-3 rounded-lg"
+            v-model="passwordForm.newConfirmPassword"
+            placeholder="New Confirm Password"
+          />
+        </div>
+      </UniDailogue>
     </div>
 
-    <div v-else>Tab Under Construction Please wait</div>
+    <div v-else>
+      <Uni_table
+        :columns="columns"
+        :rows="adminFilteredList"
+        show-actions
+        show-button
+        label-button="Add Admin"
+        @add="handleAdd"
+      />
+
+      <UniDailogue
+        v-model="AddDailog"
+        title="Add New Admin"
+        type="form"
+        width="420px"
+        @confirm="handleConfrim"
+        @cancel="AddDailog = false"
+      >
+        <div class="flex flex-col gap-3">
+          <input
+            type="text"
+            v-model="form.name"
+            class="border py-2 px-3 rounded-lg"
+            placeholder="Enter name"
+          />
+          <input
+            type="text"
+            v-model="form.email"
+            class="border py-2 px-3 rounded-lg"
+            placeholder="Enter Email"
+          />
+        </div>
+      </UniDailogue>
+    </div>
   </div>
-
-  <!-- Update Dailogue -->
-  <UniDailogue
-    v-model="updateDailog"
-    title="Update Admin"
-    type="form"
-    width="420px"
-    @confirm="updateDailog.value = false"
-  >
-    <div class="flex flex-col gap-5">
-      <input
-        type="text"
-        class="border border-gray-300 py-2 px-3 rounded-lg"
-        v-model="detailForm.name"
-        placeholder="Enter name"
-      />
-      <input
-        type="text"
-        class="border border-gray-300 py-2 px-3 rounded-lg"
-        v-model="detailForm.username"
-        placeholder="Enter Username"
-      />
-      <input
-        type="text"
-        class="border border-gray-300 py-2 px-3 rounded-lg"
-        v-model="detailForm.phone"
-        placeholder="Enter Phone"
-      />
-    </div>
-  </UniDailogue>
-
-  <!-- Password Dailogue -->
-  <UniDailogue
-    v-model="passwordDailog"
-    title="Change Password"
-    type="form"
-    width="420px"
-    @confirm="handleConfirmPassword"
-  >
-    <div class="flex flex-col gap-5">
-      <input
-        type="password"
-        class="border border-gray-300 py-2 px-3 rounded-lg"
-        v-model="passwordForm.oldPassword"
-        placeholder="Old Password"
-      />
-      <input
-        type="password"
-        class="border border-gray-300 py-2 px-3 rounded-lg"
-        v-model="passwordForm.newPassword"
-        placeholder="New Password"
-      />
-      <input
-        type="password"
-        class="border border-gray-300 py-2 px-3 rounded-lg"
-        v-model="passwordForm.newConfirmPassword"
-        placeholder="New Confirm Password"
-      />
-    </div>
-  </UniDailogue>
 </template>
