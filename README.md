@@ -67,3 +67,6 @@ npm run build
 
 Ali Ahmad
 Front-End Developer | Vue.js | React.js | Tailwind CSS
+
+### Note:
+Some thing in admin Managemenet are not working, I am working on right please wait to get updated
