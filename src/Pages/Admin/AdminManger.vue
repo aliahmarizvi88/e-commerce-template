@@ -3,10 +3,13 @@ import { computed, onMounted, ref } from 'vue';
 import { useAuthStore } from '../../store/AuthStore';
 import { useAdminStore } from '../../store/GET/AdminStore';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 import UniDailogue from '../../components/UniDailogue.vue';
 import { showToast } from '../../utils/Toast';
 import Uni_table from '../../components/Admin/Uni_table.vue';
+
+const URL = import.meta.env.VITE_LOCAL_API_URL;
 
 const authStore = useAuthStore();
 const adminStore = useAdminStore();
@@ -14,33 +17,30 @@ const adminStore = useAdminStore();
 const adminProfile = computed(() => authStore.userProfile);
 const router = useRouter();
 
-//Tabs & functions
 const activeTab = ref('Admin Profile');
 const tabs = ['Admin Profile', 'Manage Admins'];
 
 const formattedCreationDate = computed(() => {
   const rawDate = adminProfile.value?.createdOn;
-
-  if (!rawDate) {
-    return 'N/A';
-  }
+  if (!rawDate) return 'N/A';
 
   try {
     const dateObj = new Date(rawDate);
 
-    return dateObj.toLocaleDateString('en-US', {
+    return dateObj.toLocaleString('en-US', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
-      timeZone: 'UTC',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short',
     });
   } catch (e) {
-    console.error('Failed to parse date:', rawDate, e);
     return 'Invalid Date';
   }
 });
 
-//UniTable Codes
 const currentAdminId = computed(() => authStore.userProfile?.id);
 
 const adminFilteredList = computed(() => {
@@ -66,11 +66,30 @@ onMounted(() => {
     adminStore.fetchAllAdmins();
   }
 });
+
 const AddDailog = ref(false);
+const editDailog = ref(false);
+const updateDailog = ref(false);
+const passwordDailog = ref(false);
+const selectProduct = ref(null);
 
 const form = ref({
   name: '',
   email: '',
+  username: '',
+  phone: '',
+});
+
+const detailForm = ref({
+  name: '',
+  username: '',
+  phone: '',
+});
+
+const passwordForm = ref({
+  oldPassword: '',
+  newPassword: '',
+  newConfirmPassword: '',
 });
 
 function handleAdd() {
@@ -81,6 +100,31 @@ function handleAdd() {
   AddDailog.value = true;
 }
 
+function handleDelete(row) {
+  adminStore.deleteAdmin(row.id);
+  showToast('Admin Deleted Sucessfully', 'success');
+}
+
+function handleEdit(row) {
+  selectProduct.value = row;
+  form.value = { ...row };
+  editDailog.value = true;
+}
+
+const handleConfirmEdit = async () => {
+  if (!form.value.name || !form.value.email) {
+    showToast('Name and Email are required.', 'error');
+    return;
+  }
+  try {
+    await adminStore.editAdmin(form.value);
+    showToast('Admin Updated Successfully!', 'success');
+    editDailog.value = false;
+  } catch (error) {
+    showToast('Failed to update admin.', 'error');
+  }
+};
+
 const handleConfrim = () => {
   if (!form.value.name || !form.value.email) {
     showToast('Something is missing.');
@@ -89,15 +133,6 @@ const handleConfrim = () => {
   adminStore.addNewAdmin(form.value);
   AddDailog.value = false;
 };
-
-//Change Admin Details:
-const updateDailog = ref(false);
-
-const detailForm = ref({
-  name: '',
-  username: '',
-  phone: '',
-});
 
 const handleUpdateClick = () => {
   if (adminProfile.value) {
@@ -110,14 +145,44 @@ const handleUpdateClick = () => {
   updateDailog.value = true;
 };
 
-//Change Admin Password:
-const passwordDailog = ref(false);
+const handleConfirmUpdate = async () => {
+  if (
+    !detailForm.value.name ||
+    !detailForm.value.username ||
+    !detailForm.value.phone
+  ) {
+    showToast('All detail fields are required.', 'error');
+    return;
+  }
 
-const passwordForm = ref({
-  oldPassword: '',
-  newPassword: '',
-  newConfirmPassword: '',
-});
+  if (!adminProfile.value) return;
+
+  const payload = {
+    name: detailForm.value.name,
+    username: detailForm.value.username,
+    phone: detailForm.value.phone,
+  };
+
+  try {
+    const response = await axios.patch(
+      `${URL}/admin/${adminProfile.value.id}`,
+      payload
+    );
+
+    // Manually update store state and session storage for the logged-in admin
+    if (response.data) {
+      authStore._handleSuccessfulLogin(response.data, 'admin');
+    } else {
+      // Fallback: Manually update local state if response data is minimal
+      authStore.adminProfile = { ...authStore.adminProfile, ...payload };
+    }
+
+    showToast('Profile Details Updated Successfully!', 'success');
+    updateDailog.value = false;
+  } catch (error) {
+    showToast('Failed to update details.', 'error');
+  }
+};
 
 const handlePasswordClick = () => {
   passwordForm.value = {
@@ -264,13 +329,12 @@ const handleLogout = () => {
         </p>
       </div>
 
-      <!-- Update Dailogue -->
       <UniDailogue
         v-model="updateDailog"
         title="Update Admin"
         type="form"
         width="420px"
-        @confirm="updateDailog.value = false"
+        @confirm="handleConfirmUpdate"
       >
         <div class="flex flex-col gap-5">
           <input
@@ -294,7 +358,6 @@ const handleLogout = () => {
         </div>
       </UniDailogue>
 
-      <!-- Password Dailogue -->
       <UniDailogue
         v-model="passwordDailog"
         title="Change Password"
@@ -333,6 +396,8 @@ const handleLogout = () => {
         show-button
         label-button="Add Admin"
         @add="handleAdd"
+        @delete="handleDelete"
+        @edit="handleEdit"
       />
 
       <UniDailogue
@@ -355,6 +420,42 @@ const handleLogout = () => {
             v-model="form.email"
             class="border py-2 px-3 rounded-lg"
             placeholder="Enter Email"
+          />
+        </div>
+      </UniDailogue>
+
+      <UniDailogue
+        v-model="editDailog"
+        title="Edit Admin"
+        type="form"
+        width="420px"
+        @confirm="handleConfirmEdit"
+        @cancel="editDailog = false"
+      >
+        <div class="flex flex-col gap-3">
+          <input
+            type="text"
+            v-model="form.name"
+            class="border py-2 px-3 rounded-lg"
+            placeholder="Enter name"
+          />
+          <input
+            type="text"
+            v-model="form.email"
+            class="border py-2 px-3 rounded-lg"
+            placeholder="Enter Email"
+          />
+          <input
+            type="text"
+            v-model="form.username"
+            class="border py-2 px-3 rounded-lg"
+            placeholder="Enter username"
+          />
+          <input
+            type="text"
+            v-model="form.phone"
+            class="border py-2 px-3 rounded-lg"
+            placeholder="Enter Phone"
           />
         </div>
       </UniDailogue>

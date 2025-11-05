@@ -249,28 +249,6 @@
           "long": "81.1496"
         },
         "city": "kilcoole",
-        "street": "new road",
-        "number": 7682,
-        "zipcode": "12926-3874"
-      },
-      "id": "1",
-      "email": "john@gmail.com",
-      "username": "johnd",
-      "password": "m38rmF$",
-      "name": {
-        "firstname": "john",
-        "lastname": "doe"
-      },
-      "phone": "1-570-236-7033",
-      "__v": 0
-    },
-    {
-      "address": {
-        "geolocation": {
-          "lat": "-37.3159",
-          "long": "81.1496"
-        },
-        "city": "kilcoole",
         "street": "Lovers Ln",
         "number": 7267,
         "zipcode": "12926-3874"
@@ -460,28 +438,6 @@
         "lastname": "klein"
       },
       "phone": "1-104-001-4567",
-      "__v": 0
-    },
-    {
-      "id": "cd57",
-      "email": "aliahmadrizvi88@gmail.com",
-      "password": "ALIearth",
-      "username": "aliahmad88",
-      "name": {
-        "firstname": "Ali",
-        "lastname": "Ahmad"
-      },
-      "phone": "03234405025",
-      "address": {
-        "city": "Lahore",
-        "street": "Haq Street Urdu Bazar",
-        "zipcode": "54000",
-        "number": 35,
-        "geolocation": {
-          "lat": "0",
-          "long": "0"
-        }
-      },
       "__v": 0
     }
   ],
@@ -688,16 +644,6 @@
       "username": "aliahmad88",
       "createdOn": "2025-04-10T12:00:00.000Z",
       "phone": "+92 12345678910",
-      "password": "12345678",
-      "mustChangePassword": false
-    },
-    {
-      "id": "e81a",
-      "name": "kainat Aslam",
-      "email": "kainat@email.com",
-      "username": "kainataslam88",
-      "createdOn": "2025-11-04T09:06:27.110Z",
-      "phone": "yet to be set",
       "password": "12345678",
       "mustChangePassword": false
     },

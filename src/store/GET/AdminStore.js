@@ -44,7 +44,6 @@ export const useAdminStore = defineStore('admin', {
 
         if (response.data.length === 1) {
           const foundAdmin = response.data[0];
-
           const authStore = useAuthStore();
           authStore._handleSuccessfulLogin(foundAdmin, 'admin');
 
@@ -69,7 +68,6 @@ export const useAdminStore = defineStore('admin', {
         this.admins = response.data || [];
       } catch (err) {
         this.error = 'Failed to fetch administrator list.';
-        console.error(err);
         throw err;
       } finally {
         this.loading = false;
@@ -99,6 +97,45 @@ export const useAdminStore = defineStore('admin', {
         this.error =
           err.response?.data?.message || 'Failed to create new administrator.';
         throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async editAdmin(updatedAdmin) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await axios.patch(
+          `${URL}/admin/${updatedAdmin.id}`,
+          updatedAdmin
+        );
+
+        const savedAdmin = response.data;
+
+        const index = this.admins.findIndex((p) => p.id === savedAdmin.id);
+
+        if (index !== -1) {
+          this.admins[index] = savedAdmin;
+        }
+      } catch (err) {
+        this.error = err.message || 'Failed to update admin.';
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async deleteAdmin(id) {
+      this.loading = false;
+      this.error = null;
+
+      try {
+        await axios.delete(`${URL}/admin/${id}`);
+        this.admins = this.admins.filter((item) => item.id !== id);
+      } catch (error) {
+        this.error = 'Failed to delete admin';
       } finally {
         this.loading = false;
       }

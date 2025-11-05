@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useUserStore } from '../../store/UserStore';
 import Uni_table from '../../components/Admin/Uni_table.vue';
+import { showToast } from '../../utils/Toast';
 
 const userStore = useUserStore();
 
@@ -21,6 +22,7 @@ const handleDelete = (row) => {
   takeAction.value = 'delete';
   showDailogue.value = true;
   userStore.deleteUser(row.id);
+  showToast('User Deleted Successfully', 'success');
 };
 
 const handleBan = (row) => {

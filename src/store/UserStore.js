@@ -32,6 +32,20 @@ export const useUserStore = defineStore('userStore', {
         this.loading = false;
       }
     },
-    deleteUser(id) {},
+
+    async deleteUser(id) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        await axios.delete(`${URL}/users/${id}`);
+
+        this.users = this.users.filter((item) => item.id !== id);
+      } catch (err) {
+        this.error = 'Failed to delete User';
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 });

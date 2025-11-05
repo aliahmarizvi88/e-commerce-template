@@ -6,6 +6,7 @@ import { useCategoryStore } from '../../store/GET/CategoryStore';
 
 import Uni_table from '../../components/Admin/Uni_table.vue';
 import UniDailogue from '../../components/UniDailogue.vue';
+import { showToast } from '../../utils/Toast';
 
 const productStore = useProductStore();
 const categoryStore = useCategoryStore();
@@ -51,7 +52,7 @@ const handleEdit = (row) => {
 
 const handleDelete = (row) => {
   productStore.deleteProduct(row.id);
-  console.log('Deleted');
+  showToast('Product Deleted Sucessfully', 'success');
 };
 
 const handleConfirm = () => {
