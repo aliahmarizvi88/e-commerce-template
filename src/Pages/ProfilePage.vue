@@ -142,7 +142,7 @@ const deleteUserAccount = async () => {
 </script>
 
 <template>
-  <div class="max-w-xl mx-auto p-6 rounded-lg">
+  <div class="max-w-xl mx-auto p-6 rounded-lg animate-fade-in-up">
     <div v-if="userProfile">
       <h1 class="text-3xl font-bold capitalize">
         Welcome back, {{ userProfile.name.firstname }}

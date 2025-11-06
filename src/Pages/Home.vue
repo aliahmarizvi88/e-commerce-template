@@ -5,7 +5,9 @@ import ProductsSection from '../components/Home/ProductsSection.vue';
 </script>
 
 <template>
-  <Banner />
-  <CategorySection />
-  <ProductsSection />
+  <div class="animate-fade-in-up">
+    <Banner />
+    <CategorySection />
+    <ProductsSection />
+  </div>
 </template>

@@ -11,7 +11,7 @@ const favorites = computed(() => favoriteStore.favorite);
 </script>
 
 <template>
-  <div class="mt-[80px] mx-60">
+  <div class="mt-[80px] mx-60 animate-fade-in-up">
     <h1 class="text-3xl font-extrabold">My Wishlist</h1>
     <div
       v-if="favoriteStore.favoriteCount === 0"

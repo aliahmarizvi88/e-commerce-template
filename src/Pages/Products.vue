@@ -16,7 +16,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="mt-[80px] mx-10">
+  <div class="mt-[80px] mx-10 animate-fade-in-up">
     <h1 class="text-3xl font-bold">Products</h1>
 
     <div v-if="productStore.errors" class="text-red-600">

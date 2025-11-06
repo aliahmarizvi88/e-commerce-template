@@ -29,7 +29,7 @@ const removeFromCart = (item) => {
 </script>
 
 <template>
-  <div class="mt-24 px-4 sm:px-6 md:px-10 lg:px-20">
+  <div class="mt-24 px-4 sm:px-6 md:px-10 lg:px-20 animate-fade-in-up">
     <h1
       class="text-2xl sm:text-3xl font-extrabold mb-8 text-center md:text-left"
     >

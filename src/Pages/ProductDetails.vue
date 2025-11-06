@@ -54,7 +54,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mt-24 px-4 sm:px-6 md:px-10 lg:px-20">
+  <div class="mt-24 px-4 sm:px-6 md:px-10 lg:px-20 animate-fade-in-up">
     <div v-if="error" class="h-screen text-red-600 font-bold text-center">
       {{ error }}
     </div>

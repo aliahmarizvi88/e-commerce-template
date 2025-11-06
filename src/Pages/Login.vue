@@ -31,7 +31,7 @@ const handleLogin = async () => {
 
 <template>
   <form
-    class="flex flex-col justify-center items-center gap-12"
+    class="flex flex-col justify-center items-center gap-12 animate-fade-in-up"
     @submit.prevent="handleLogin"
   >
     <h1 class="text-4xl font-extrabold uppercase">Login</h1>

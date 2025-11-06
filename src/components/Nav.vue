@@ -44,7 +44,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="flex gap-10 bg-black items-center justify-between text-white p-10 mb-5"
+    class="flex gap-10 bg-black items-center justify-between text-white p-10"
   >
     <h1
       class="lg:text-4xl md:text-3xl font-extrabold cursor-pointer"
@@ -185,6 +185,44 @@ onBeforeUnmount(() => {
           </button>
         </div>
       </div>
+    </div>
+  </div>
+  <div class="overflow-hidden bg-[#eeee] mb-5">
+    <div
+      class="marquee-content flex gap-8 items-center animate-ecom-marquee min-w-full"
+    >
+      <p
+        class="text-center whitespace-nowrap text-black text-sm font-bold tracking-widest"
+      >
+        WELCOME TO OUR NEW STORE! —
+      </p>
+      <p
+        class="text-center whitespace-nowrap text-black text-sm font-bold tracking-widest"
+      >
+        GETTING A NEW SALE SOON ENOUGH!
+      </p>
+
+      <p
+        class="text-center whitespace-nowrap text-black text-sm font-bold tracking-widest"
+      >
+        WELCOME TO OUR NEW STORE! —
+      </p>
+      <p
+        class="text-center whitespace-nowrap text-black text-sm font-bold tracking-widest"
+      >
+        GETTING A NEW SALE SOON ENOUGH!
+      </p>
+
+      <p
+        class="text-center whitespace-nowrap text-black text-sm font-bold tracking-widest"
+      >
+        WELCOME TO OUR NEW STORE! —
+      </p>
+      <p
+        class="text-center whitespace-nowrap text-black text-sm font-bold tracking-widest"
+      >
+        GETTING A NEW SALE SOON ENOUGH!
+      </p>
     </div>
   </div>
 </template>
